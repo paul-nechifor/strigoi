@@ -1,0 +1,1 @@
+exports.Document = require './Document'

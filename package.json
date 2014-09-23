@@ -1,0 +1,24 @@
+{
+  "name": "strigoi",
+  "version": "0.0.0",
+  "author": "Paul Nechifor <paul@nechifor.net> (http://nechifor.net/)",
+  "main": "./lib",
+  "bin": {
+    "strigoi": "./bin/strigoi.js"
+  },
+  "scripts": {
+    "preinstall": "rm -fr lib/*; coffee --compile --bare --output lib src"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "html-minifier": "^0.6.8",
+    "js-yaml": "^3.2.2",
+    "marked": "^0.3.2",
+    "optimist": "^0.6.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paul-nechifor/strigoi"
+  },
+  "license": "MIT"
+}
