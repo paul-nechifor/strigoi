@@ -1,5 +1,7 @@
 module.exports = class Type
-  constructor: (@data, @str) ->
+  constructor: (@doc, @data, @str) ->
     @html = ''
 
-  process: (cb) ->
+  load: (cb) ->
+
+  render: ->

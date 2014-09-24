@@ -6,6 +6,6 @@ module.exports = class Yaml extends Type
     super
     @content = null
 
-  process: (cb) ->
+  load: (cb) ->
     @content = yaml.safeLoad @str
     cb()

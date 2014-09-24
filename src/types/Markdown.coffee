@@ -13,7 +13,7 @@ module.exports = class Markdown extends Type
       collapseWhitespace: true
       caseSensitive: true
 
-  process: (cb) ->
+  load: (cb) ->
     @html = marked @str
     @html = minifyHtml @html, @minifyHtmlOptions
     cb()
