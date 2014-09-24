@@ -1,11 +1,15 @@
 async = require 'async'
+fs = require 'fs'
+path = require 'path'
 yaml = require 'js-yaml'
 
 module.exports = class Document
   types =
     md: require './types/Markdown'
 
-  constructor: (@src, @data) ->
+  constructor: (@srcFile, @data) ->
+    @dirName = path.dirname @srcFile
+    @id = path.basename @srcFile, '.strig'
     @doc = {}
     @parts = []
     @ids = {}
@@ -42,4 +46,8 @@ module.exports = class Document
     @html = @parts.map((p) -> p.html).join ''
 
   save: (cb) ->
-    console.log @html
+    parent = @dirName + '/strigoi'
+    fs.mkdir parent, (err) =>
+      # Ignore error.
+      path = parent + '/' + @id + '.html'
+      fs.writeFile path, @html, cb
