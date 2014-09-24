@@ -1,6 +1,7 @@
 async = require 'async'
 fs = require 'fs'
 optimist = require 'optimist'
+path = require 'path'
 Document = require './Document'
 
 module.exports = main = ->
@@ -25,7 +26,8 @@ module.exports = main = ->
     process.exit()
 
   if argv._.length > 0
-    processFiles argv._
+    files = argv._.map (f) -> path.resolve process.cwd(), f
+    processFiles files
     return
 
   findFiles argv['doc-dir'], (err, files) ->
