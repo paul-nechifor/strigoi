@@ -6,6 +6,7 @@ yaml = require 'js-yaml'
 module.exports = class Document
   types =
     md: require './types/Markdown'
+    yaml: require './types/Yaml'
 
   constructor: (@srcFile, @data) ->
     @dirName = path.dirname @srcFile
