@@ -1,1 +1,1 @@
-exports.Document = require './Document'
+exports.Site = require './Site'

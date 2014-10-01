@@ -1,23 +1,24 @@
-async = require 'async'
 fs = require 'fs'
 optimist = require 'optimist'
 path = require 'path'
-Document = require './Document'
+Site = require './Site'
 
 module.exports = main = ->
   argv = optimist
   .usage 'Usage: $0 [<file1> <file2> ...]'
 
   .alias 'c', 'clean'
-  .describe 'clean', 'Clean up generated files.'
+  .describe 'clean', 'Clean both generated and temporary files.'
 
-  .default 'd', process.cwd()
-  .alias 'd', 'doc-dir'
-  .describe 'd', 'Documents directory. This is where the files are searched' +
-      ' for if no files are given as arguments.'
+  .describe 'clean-gen', 'Clean generated files.'
+
+  .describe 'clean-tmp', 'Clean temporary files.'
+
+  .alias 'd', 'site-dir'
+  .describe 'site-dir', 'Where "strigoifile.coffee" would be.'
 
   .alias 'h', 'help'
-  .describe 'h', 'Print this help message.'
+  .describe 'help', 'Print this help message.'
 
   .argv
 
@@ -25,32 +26,23 @@ module.exports = main = ->
     optimist.showHelp()
     process.exit()
 
-  if argv._.length > 0
-    files = argv._.map (f) -> path.resolve process.cwd(), f
-    processFiles files
+  if argv._.length > 1
+    console.error 'Only one file can be processed as an argument.'
+    process.exit 1
+
+  clean = {}
+  clean['gen'] = true if argv['clean-gen'] or argv['clean']
+  clean['tmp'] = true if argv['clean-tmp'] or argv['clean']
+
+  site = new Site clean
+
+  if argv._.length is 1
+    file = path.resolve process.cwd(), argv._[0]
+    site.initFile file
     return
 
-  findFiles argv['doc-dir'], (err, files) ->
-    throw err if err
-    if files.length is 0
-      console.error 'No files give or found.'
-      process.exit()
-    processFiles files
+  if argv['site-dir']
+    site.initDir argv['site-dir']
+    return
 
-processFiles = (files) ->
-  async.mapSeries files, processFile, (err, results) ->
-    throw err if err
-
-processFile = (file, cb) ->
-  fs.readFile file, {encoding: 'utf8'}, (err, data) ->
-    d = new Document file, data
-    d.process (err) ->
-      return cb err if err
-      d.save cb
-
-findFiles = (dir, cb) ->
-  fs.readdir dir, (err, files) ->
-    return cb err if err
-    files = files.filter (f) -> f.indexOf('.strig') is f.length - 6
-    files = files.map (f) -> dir + '/' + f
-    cb null, files
+  site.initCwd process.cwd()
