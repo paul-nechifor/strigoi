@@ -1,6 +1,5 @@
 fs = require 'fs'
 optimist = require 'optimist'
-path = require 'path'
 Site = require './Site'
 
 module.exports = main = ->
@@ -36,13 +35,16 @@ module.exports = main = ->
 
   site = new Site clean
 
+  cb = (err) ->
+    throw err if err
+    site.log 'Done.'
+
   if argv._.length is 1
-    file = path.resolve process.cwd(), argv._[0]
-    site.initFile file
+    site.init {file: argv._[0]}, cb
     return
 
   if argv['site-dir']
-    site.initDir argv['site-dir']
+    site.init {dir: argv['site-dir']}, cb
     return
 
-  site.initCwd process.cwd()
+  site.init {dir: process.cwd()}, cb
