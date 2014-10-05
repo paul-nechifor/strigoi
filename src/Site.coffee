@@ -1,35 +1,37 @@
 async = require 'async'
 fs = require 'fs'
 path = require 'path'
+recursive = require 'recursive-readdir'
+Document = require './Document'
 
 module.exports = class Site
   constructor: (@clean={}) ->
-    @info =
-      dir: null
-      files: {}
+    @dir = null
+    @docs = {}
     @skipStrigoifile = false
-    @useFiles = null
+    @useDocs = null
+    @findIgnorePatterns = []
 
   init: (opts, cb) ->
     if opts.file
       full = path.resolve process.cwd(), opts.file
-      @info.dir = path.dirname full
+      @dir = path.dirname full
       @skipStrigoifile = true
-      @useFiles = [path.basename full]
-      @log "Processing single file '#{@useFiles[0]}'."
+      @useDocs = [path.basename full]
+      @log "Processing single file '#{@useDocs[0]}'."
     else
-      @info.dir = path.resolve process.cwd(), opts.dir
-    @log "Using dir '#{@info.dir}'."
+      @dir = path.resolve process.cwd(), opts.dir
+    @log "Using dir '#{@dir}'."
     @process cb
 
   process: (cb) ->
     list = [
       @processStrigoifile
       @cleanup
-      @findFiles
-      @loadFiles
-      @getFilesInfo
-      @processFiles
+      @findDocs
+      @loadDocs
+      @getDocsInfo
+      @processDocs
     ].map (i) => i.bind @
     async.series list, cb
 
@@ -37,7 +39,7 @@ module.exports = class Site
     if @skipStrigoifile
       return cb()
 
-    file = @info.dir + '/strigoifile.coffee'
+    file = @dir + '/strigoifile.coffee'
     if not fs.existsSync file
       return cb()
 
@@ -53,19 +55,31 @@ module.exports = class Site
   cleanup: (cb) ->
     cb()
 
-  findFiles: (cb) ->
-    if @useFiles
-      @info.files[file] = {} for file in @useFiles
+  findDocs: (cb) ->
+    if @useDocs
+      @addDocs @useDocs
       return cb()
+    recursive @dir, @findIgnorePatterns, (err, files) =>
+      return cb err if err
+      @addDocs files
     cb()
 
-  loadFiles: (cb) ->
+  addDocs: (files) ->
+    for file in files
+      continue unless file.lastIndexOf('.strig') is file.length - 6
+      relative = path.relative @dir, file
+      full = path.resolve @dir, file
+      place = relative.substring 0, relative.length - 6
+      @docs[place] = new Document @, place, full
+    return
+
+  loadDocs: (cb) ->
     cb()
 
-  getFilesInfo: (cb) ->
+  getDocsInfo: (cb) ->
     cb()
 
-  processFiles: (cb) ->
+  processDocs: (cb) ->
     cb()
 
   log: (str) ->
