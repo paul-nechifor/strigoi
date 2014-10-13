@@ -7,7 +7,7 @@ module.exports = class DocumentsProcessor extends require './Processor'
   constructor: ->
     super
     @docs = {}
-    @docsList = []
+    @docList = []
 
   init: (cb) ->
     @selfSeries [
@@ -32,12 +32,12 @@ module.exports = class DocumentsProcessor extends require './Processor'
       continue unless file.lastIndexOf('.strig') is file.length - 6
       relative = path.relative @site.dir, file
       full = path.resolve @site.dir, file
-      place = relative.substring 0, relative.length - 6
-      @docsList.push @docs[place] = new Document @, place, full
+      id = relative.substring 0, relative.length - 6
+      @docList.push @docs[id] = new Document @, @site, id, full
     return
 
   loadDocs: (cb) ->
-    @site.successiveCalls @docs, ['init', 'load', 'write'], cb
+    @site.successiveCalls @docList, ['init', 'load', 'loadAsync', 'write'], cb
 
   processDocs: (cb) ->
     cb()

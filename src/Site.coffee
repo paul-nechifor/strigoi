@@ -9,6 +9,10 @@ module.exports = class Site
     @findIgnorePatterns = []
     @genDir = 'generated'
     @tmpDir = '.strigoi-tmp'
+    @minifyHtmlOptions =
+      removeComments: true
+      collapseWhitespace: true
+      caseSensitive: true
     @docs = new (require './proc/DocumentsProcessor') @
     @processors = [
       new (require './proc/StrigoifileProcessor') @
@@ -40,6 +44,11 @@ module.exports = class Site
 
   dirJoin: (part) ->
     path.join @dir, part
+
+  dirJoins: ->
+    parts = Array.prototype.slice.call arguments, 0
+    parts.splice 0, 0, @dir
+    path.join.apply path.join, parts
 
   log: (str) ->
     console.log str
