@@ -1,5 +1,6 @@
 async = require 'async'
 path = require 'path'
+{exec, spawn} = require 'child_process'
 
 module.exports = class Site
   constructor: (@clean={}) ->
@@ -52,3 +53,18 @@ module.exports = class Site
 
   log: (str) ->
     console.log str
+
+  spawn: (name, args, cb) ->
+    s = spawn name, args
+    s.stdout.on 'data', (data) -> process.stdout.write data
+    s.stderr.on 'data', (data) -> process.stderr.write data
+    s.on 'close', (code) ->
+      cb 'err-' + code unless code is 0
+      cb()
+
+  exec: (script, cb) ->
+    exec script, (err, stdout, stderr) ->
+      process.stdout.write stdout
+      process.stderr.write stderr
+      return cb err if err
+      cb()

@@ -12,11 +12,11 @@ module.exports = class CleanupProcessor extends require './Processor'
 
   cleanupGen: (cb) ->
     return cb() unless @site.clean['gen']
-    @spawn 'rm', ['-fr', @genDir], cb
+    @site.spawn 'rm', ['-fr', @genDir], cb
 
   cleanupTmp: (cb) ->
     return cb() unless @site.clean['tmp']
-    @spawn 'rm', ['-fr', @tmpDir], cb
+    @site.spawn 'rm', ['-fr', @tmpDir], cb
 
   recreate: (cb) ->
     fs.mkdir @genDir, 0o755, =>

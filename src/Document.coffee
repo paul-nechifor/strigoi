@@ -2,10 +2,12 @@ async = require 'async'
 fs = require 'fs'
 path = require 'path'
 yaml = require 'js-yaml'
+LatexEnv = require './LatexEnv'
 
 module.exports = class Document
   partTypes =
     jade: require './parts/Jade'
+    latex: require './parts/Latex'
     md: require './parts/Markdown'
     yaml: require './parts/Yaml'
 
@@ -17,6 +19,7 @@ module.exports = class Document
     @async = {}
     @asyncsToLoad = []
     @main = null
+    @latexEnv = new LatexEnv @
     @exports = new StrigoiExports @
 
   init: (cb) ->
