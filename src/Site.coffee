@@ -14,6 +14,16 @@ module.exports = class Site
       removeComments: true
       collapseWhitespace: true
       caseSensitive: true
+    @scourOptions = [
+      '--enable-comment-stripping'
+      '--enable-id-stripping'
+      '--enable-viewboxing'
+      '--enable-viewboxing'
+      '--indent=none'
+      '--remove-metadata'
+      '--shorten-ids'
+      '--strip-xml-prolog'
+    ]
     @docs = new (require './proc/DocumentsProcessor') @
     @processors = [
       new (require './proc/StrigoifileProcessor') @

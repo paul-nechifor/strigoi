@@ -18,10 +18,16 @@ module.exports = class Latex extends require './Part'
       cd '#{path}'
       latex '#{path}/a.tex'
       dvisvgm -c #{ratio} --no-fonts a.dvi
+      scour #{@doc.site.scourOptions.join ' '} -i a.svg -o b.svg
     """, (err) =>
       return cb err if err
-      fs.readFile path + '/a.svg', {encoding: 'utf8'}, (err, data) =>
+      fs.readFile path + '/b.svg', {encoding: 'utf8'}, (err, data) =>
+        data = data.replace /<!--.*-->/, ''
+        data = data.replace /<!DOCTYPE.*>/i, ''
+        data = data.replace />\n</g, '><'
+        data = data.trim()
+        if @data.id
+          data = "<div id='#{@data.id}'>#{data}</div>"
         @doc.site.spawn 'rm', ['-fr', path], (err) ->
           return cb err if err
-          console.log data
           cb null, data
