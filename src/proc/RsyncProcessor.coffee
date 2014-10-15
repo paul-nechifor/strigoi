@@ -1,0 +1,39 @@
+async = require 'async'
+fs = require 'fs'
+path = require 'path'
+
+module.exports = class RsyncProcessor extends require './Processor'
+  run: (cb) ->
+    fromPrefix = @site.dir + '/'
+    bowerFromPrefix = @site.tmpDir + '/bower_components'
+    npmFromPrefix = @site.tmpDir + '/node_modules'
+    toPrefix = @site.dirJoin(@site.genDir) + '/'
+
+    rsync = (r, cb) =>
+      opts = ['-a', '--del']
+      froms = null
+      to = null
+
+      if r instanceof Array
+        froms = r.slice 0, r.length - 1
+        to = r[r.length - 1]
+      else
+        if r.from instanceof Array
+          froms = r.from
+        else
+          froms = [r.from]
+        to = r.to
+
+      froms = froms.map (f) ->
+        f = f.replace /^@bower/, bowerFromPrefix
+        f = f.replace /^@npm/, npmFromPrefix
+        fromPrefix + f
+
+      to = toPrefix + to
+      fs.mkdir path.dirname(to), (err) =>
+        # Ignore error.
+        opts.push.apply opts, froms
+        opts.push to
+        @site.spawn 'rsync', opts, cb
+
+    async.mapSeries @site.rsync, rsync, cb

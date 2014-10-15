@@ -16,6 +16,7 @@ module.exports = class Site
       removeComments: true
       collapseWhitespace: true
       caseSensitive: true
+    @rsync = []
     @scourOptions = [
       '--enable-comment-stripping'
       '--enable-id-stripping'
@@ -30,6 +31,7 @@ module.exports = class Site
       findIgnorePatterns: true
       npmPackages: true
       bowerPackages: true
+      rsync: true
       scourOptions: true
       processors: true
     @objectOptions =
@@ -39,6 +41,7 @@ module.exports = class Site
       new (require './proc/StrigoifileProcessor') @
       new (require './proc/CleanupProcessor') @
       new (require './proc/PackageProcessor') @
+      new (require './proc/RsyncProcessor') @
       @docs
     ]
 
