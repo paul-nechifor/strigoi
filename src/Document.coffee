@@ -15,8 +15,9 @@ module.exports = class Document
     @info = null
     @data = null
     @parts = []
-    @ids = {}
+    @partsIds = {}
     @async = {}
+    @yaml = {}
     @asyncsToLoad = []
     @main = null
     @latexEnv = new LatexEnv @
@@ -41,7 +42,7 @@ module.exports = class Document
       return cb 'Unkown part type: ' + data.type
     part = new Part @, data, str
     @parts.push part
-    @ids[data.id] = part if data.id?
+    @partsIds[data.id] = part if data.id?
     if data.main
       @main = part
       @info = data.info if data.info
@@ -96,5 +97,4 @@ module.exports = class Document
 class StrigoiExports
   constructor: (@doc) ->
     @async = @doc.async
-
-  getYaml: (id) -> @doc.ids[id].content
+    @yaml = @doc.yaml
