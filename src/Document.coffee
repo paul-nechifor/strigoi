@@ -30,10 +30,7 @@ module.exports = class Document
 
   load: (cb) ->
     parts = @data.split '\n---\n'
-    @info = yaml.safeLoad parts[0]
-    n = parts.length - 1
-    n-- if n % 2 is 1
-    for i in [1 .. n] by 2
+    for i in [0 .. parts.length - 1] by 2
       @addPart parts[i], parts[i + 1]
     @loadParts cb
 
@@ -45,7 +42,9 @@ module.exports = class Document
     part = new Part @, data, str
     @parts.push part
     @ids[data.id] = part if data.id?
-    @main = part if data.main
+    if data.main
+      @main = part
+      @info = data.info if data.info
     if data.async
       for key, value of data.async
         a = {id: key}
