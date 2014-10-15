@@ -6,18 +6,26 @@ module.exports = class DocumentsProcessor extends require './Processor'
     @strigoifile = null
 
   init: (cb) ->
-    return cb() if @site.skipStrigoifile
+    err = @initFile()
+    return cb err if err
+
+    if @site.configureJson
+      @site.configure JSON.parse @site.configureJson
+
+    @runFunc 'init', cb
+
+  initFile: ->
+    return if @site.skipStrigoifile
 
     file = @site.dirJoin 'strigoifile.coffee'
-    return cb unless fs.existsSync file
+    return unless fs.existsSync file
 
     require 'coffee-script/register'
     try
       @strigoifile = require file
     catch err
-      return cb err
-
-    @runFunc 'init', cb
+      return err
+    return
 
   run: (cb) ->
     @runFunc 'run', cb

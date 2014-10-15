@@ -16,6 +16,9 @@ module.exports = main = ->
   .alias 'd', 'site-dir'
   .describe 'site-dir', 'Where "strigoifile.coffee" would be.'
 
+  .alias 's', 'configure'
+  .describe 'configure', 'The JSON to pass to Site.configure.'
+
   .alias 'h', 'help'
   .describe 'help', 'Print this help message.'
 
@@ -33,7 +36,7 @@ module.exports = main = ->
   clean['gen'] = true if argv['clean-gen'] or argv['clean']
   clean['tmp'] = true if argv['clean-tmp'] or argv['clean']
 
-  site = new Site clean
+  site = new Site clean, argv.configure
 
   cb = (err) ->
     throw err if err

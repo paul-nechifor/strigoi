@@ -3,7 +3,7 @@ path = require 'path'
 {exec, spawn} = require 'child_process'
 
 module.exports = class Site
-  constructor: (@clean={}) ->
+  constructor: (@clean={}, @configureJson) ->
     @dir = null
     @skipStrigoifile = false
     @useDocs = null

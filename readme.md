@@ -1,6 +1,6 @@
 # Strigoi
 
-Multidocument transformation tool into web files.
+Multiformat static site generator.
 
 ## Binary requirements
 
