@@ -10,6 +10,8 @@ module.exports = class Site
     @findIgnorePatterns = []
     @genDir = 'generated'
     @tmpDir = '.strigoi-tmp'
+    @npmPackages = []
+    @bowerPackages = []
     @minifyHtmlOptions =
       removeComments: true
       collapseWhitespace: true
@@ -24,10 +26,19 @@ module.exports = class Site
       '--shorten-ids'
       '--strip-xml-prolog'
     ]
+    @arrayOptions =
+      findIgnorePatterns: true
+      npmPackages: true
+      bowerPackages: true
+      scourOptions: true
+      processors: true
+    @objectOptions =
+      minifyHtmlOptions: true
     @docs = new (require './proc/DocumentsProcessor') @
     @processors = [
       new (require './proc/StrigoifileProcessor') @
       new (require './proc/CleanupProcessor') @
+      new (require './proc/PackageProcessor') @
       @docs
     ]
 
@@ -63,6 +74,16 @@ module.exports = class Site
 
   log: (str) ->
     console.log str
+
+  configure: (cs) ->
+    for key, value of cs
+      if @arrayOptions[key]
+        @[key].push.apply @[key], value
+      else if @objectOptions[key]
+        @[key][oKey] = oValue for oKey, oValue of value
+      else
+        @[key] = value
+    return
 
   spawn: (name, args, cb) ->
     s = spawn name, args
