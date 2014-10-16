@@ -22,6 +22,7 @@ module.exports = class Document
     @main = null
     @latexEnv = new LatexEnv @
     @exports = new StrigoiExports @
+    @asyncFunctionSet = new AsyncFunctionSet @
 
   init: (cb) ->
     fs.readFile @src, {encoding: 'utf8'}, (err, data) =>
@@ -49,7 +50,10 @@ module.exports = class Document
     if data.async
       for key, value of data.async
         a = {id: key}
-        if typeof value is 'string'
+        if value instanceof Array
+          a.name = value[0]
+          a.opts = value.slice 1
+        else if typeof value is 'string'
           a.name = value
         else
           a.name = value.name
@@ -63,7 +67,7 @@ module.exports = class Document
 
   loadAsync: (cb) ->
     renderAsync = (a, cb) =>
-      @[a.name] a.opts, (err, result) =>
+      @asyncFunctionSet[a.name] a.opts, (err, result) =>
         return cb err if err
         @async[a.id] = result
         cb()
@@ -76,16 +80,7 @@ module.exports = class Document
 
   buildHtml: (cb) ->
     return @main.render {}, cb if @main
-    @innerDoc {}, cb
-
-  innerDoc: (opts, cb) ->
-    f = (p, cb) ->
-      return cb null, '' if p.data.exclude or p.data.main
-      p.render {}, cb
-
-    async.mapSeries @parts, f, (err, results) ->
-      return cb err if err
-      cb null, results.join ''
+    @asyncFunctionSet.innerDoc {}, cb
 
   save: (html, cb) ->
     file = @site.dirJoins @site.genDir, @id + '.html'
@@ -98,3 +93,19 @@ class StrigoiExports
   constructor: (@doc) ->
     @async = @doc.async
     @yaml = @doc.yaml
+
+class AsyncFunctionSet
+  constructor: (@doc) ->
+
+  innerDoc: (opts, cb) ->
+    f = (p, cb) ->
+      return cb null, '' if p.data.exclude or p.data.main
+      p.render {}, cb
+
+    async.mapSeries @doc.parts, f, (err, results) ->
+      return cb err if err
+      cb null, results.join ''
+
+  readFile: (opts, cb) ->
+    file = @doc.site.fromPath opts[0]
+    fs.readFile file, {encoding: 'utf8'}, cb
