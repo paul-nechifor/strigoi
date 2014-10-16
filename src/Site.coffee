@@ -75,6 +75,14 @@ module.exports = class Site
     parts.splice 0, 0, @dir
     path.join.apply path.join, parts
 
+  fromPath: (name) ->
+    name = name.replace /^@bower/, @tmpDir + '/bower_components'
+    name = name.replace /^@npm/, @tmpDir + '/node_modules'
+    @dir + '/' + name
+
+  toPath: (name) ->
+    @dirJoin(@genDir) + '/' + name
+
   log: (str) ->
     console.log str
 

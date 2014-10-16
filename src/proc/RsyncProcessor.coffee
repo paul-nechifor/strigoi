@@ -4,11 +4,6 @@ path = require 'path'
 
 module.exports = class RsyncProcessor extends require './Processor'
   run: (cb) ->
-    fromPrefix = @site.dir + '/'
-    bowerFromPrefix = @site.tmpDir + '/bower_components'
-    npmFromPrefix = @site.tmpDir + '/node_modules'
-    toPrefix = @site.dirJoin(@site.genDir) + '/'
-
     rsync = (r, cb) =>
       opts = ['-a', '--del']
       froms = null
@@ -24,12 +19,9 @@ module.exports = class RsyncProcessor extends require './Processor'
           froms = [r.from]
         to = r.to
 
-      froms = froms.map (f) ->
-        f = f.replace /^@bower/, bowerFromPrefix
-        f = f.replace /^@npm/, npmFromPrefix
-        fromPrefix + f
+      froms = froms.map (f) => @site.fromPath f
+      to = @site.toPath to
 
-      to = toPrefix + to
       fs.mkdir path.dirname(to), (err) =>
         # Ignore error.
         opts.push.apply opts, froms
