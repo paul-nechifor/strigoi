@@ -14,7 +14,7 @@ module.exports = class DocumentsProcessor extends require './Processor'
       full = path.resolve @site.dir, file
       id = relative.substring 0, relative.length - 6
       @docList.push @docs[id] = new Document @, @site, id, full
-    cb()
+    @site.successiveCalls @docList, ['init', 'load'], cb
 
   run: (cb) ->
-    @site.successiveCalls @docList, ['init', 'load', 'loadAsync', 'write'], cb
+    @site.successiveCalls @docList, ['loadAsync', 'write'], cb

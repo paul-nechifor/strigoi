@@ -5,6 +5,8 @@ module.exports = class Processor
 
   init: (cb) -> cb()
 
+  init2: (cb) -> cb()
+
   run: (cb) -> cb()
 
   finish: (cb) -> cb()

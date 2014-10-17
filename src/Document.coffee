@@ -62,6 +62,7 @@ module.exports = class Document
           a.name = value.name
           a.opts = value.opts
         @asyncsToLoad.push a
+    @site.configure data.configure if data.configure
     return
 
   loadParts: (cb) ->
@@ -119,8 +120,11 @@ class AsyncFunctionSet
         cb null, data
 
   renderJadeFile: (opts, cb) ->
-    file = path.resolve @doc.site.dir, opts[0]
-    cb null, jade.renderFile file, opts[1]
+    file = @doc.site.fromTmpPath opts[0]
+    locals =
+      doc: @doc
+      strigoi: @doc.exports
+    cb null, jade.renderFile file, @doc.site.merge opts[1], locals
 
   renderStylusFile: (args, cb) ->
     file = @doc.site.fromPath args[0]

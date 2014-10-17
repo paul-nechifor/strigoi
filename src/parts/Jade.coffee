@@ -6,6 +6,7 @@ module.exports = class Jade extends require './Part'
     @fn = null
     @locals =
       part: @
+      doc: @doc
       strigoi: @doc.exports
 
   load: (cb) ->
@@ -13,7 +14,4 @@ module.exports = class Jade extends require './Part'
     cb()
 
   render: (opts, cb) ->
-    merged = {}
-    merged[key] = value for key, value of opts
-    merged[key] = value for key, value of @locals
-    cb null, @fn merged
+    cb null, @fn @doc.site.merge opts, @locals

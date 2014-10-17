@@ -20,7 +20,6 @@ module.exports = class DocumentsProcessor extends require './Processor'
     file = @site.dirJoin 'strigoifile.coffee'
     return unless fs.existsSync file
 
-    require 'coffee-script/register'
     try
       @strigoifile = require file
     catch err

@@ -2,6 +2,7 @@ async = require 'async'
 fs = require 'fs'
 path = require 'path'
 {exec, spawn} = require 'child_process'
+require 'coffee-script/register'
 
 module.exports = class Site
   constructor: (@clean={}, @configureJson) ->
@@ -9,9 +10,11 @@ module.exports = class Site
     @id = null
     @skipStrigoifile = false
     @useDocs = null
+    @modules = {}
     @findIgnorePatterns = []
     @genDir = 'generated'
     @tmpDir = '.strigoi-tmp'
+    @modulesDir = 'modules' # Relative to @tmpDir
     @npmPackages = []
     @bowerPackages = []
     @minifyHtmlOptions =
@@ -19,6 +22,7 @@ module.exports = class Site
       collapseWhitespace: true
       caseSensitive: true
     @rsync = []
+    @useModules = []
     @scourOptions = [
       '--enable-comment-stripping'
       '--enable-id-stripping'
@@ -45,6 +49,7 @@ module.exports = class Site
       processors: true
       indexFileTypes: true
       tmpSyncFileTypes: true
+      useModules: true
     @objectOptions =
       minifyHtmlOptions: true
     @docs = new (require './proc/DocumentsProcessor') @
@@ -71,7 +76,7 @@ module.exports = class Site
     @process cb
 
   process: (cb) ->
-    @successiveCalls @processors, ['init', 'run', 'finish'], cb
+    @successiveCalls @processors, ['init', 'init2', 'run', 'finish'], cb
 
   successiveCalls: (array, methods, cb) ->
     f = (method, cb) => @callMethods array, method, cb
@@ -93,6 +98,9 @@ module.exports = class Site
     name = name.replace /^@bower/, @tmpDir + '/bower_components'
     name = name.replace /^@npm/, @tmpDir + '/node_modules'
     @dir + '/' + name
+
+  fromTmpPath: (name) ->
+    @dirJoin(@tmpDir) + '/' + name
 
   toPath: (name) ->
     @dirJoin(@genDir) + '/' + name
@@ -129,3 +137,9 @@ module.exports = class Site
       @log stderr
       return cb err if err
       cb()
+
+  merge: (a, b) ->
+    merged = {}
+    merged[key] = value for key, value of a
+    merged[key] = value for key, value of b
+    merged
