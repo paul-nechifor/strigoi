@@ -1,5 +1,6 @@
 async = require 'async'
 fs = require 'fs'
+jade = require 'jade'
 path = require 'path'
 yaml = require 'js-yaml'
 LatexEnv = require './LatexEnv'
@@ -109,3 +110,7 @@ class AsyncFunctionSet
   readFile: (opts, cb) ->
     file = @doc.site.fromPath opts[0]
     fs.readFile file, {encoding: 'utf8'}, cb
+
+  renderJadeFile: (opts, cb) ->
+    file = path.resolve @doc.site.dir, opts[0]
+    cb null, jade.renderFile file, opts[1]

@@ -5,7 +5,7 @@ path = require 'path'
 module.exports = class RsyncProcessor extends require './Processor'
   run: (cb) ->
     rsync = (r, cb) =>
-      opts = ['-a', '--del']
+      opts = ['-a']
       froms = null
       to = null
 

@@ -30,6 +30,7 @@ module.exports = class Site
     ]
     @indexFileTypes = [
       '.strig'
+      '.jade'
     ]
     @arrayOptions =
       findIgnorePatterns: true
@@ -45,8 +46,9 @@ module.exports = class Site
     @files = new (require './proc/FilesProcessor') @
     @processors = [
       new (require './proc/StrigoifileProcessor') @
-      @files
       new (require './proc/CleanupProcessor') @
+      @files
+      new (require './proc/JadeProcessor') @
       new (require './proc/PackageProcessor') @
       new (require './proc/RsyncProcessor') @
       @docs
