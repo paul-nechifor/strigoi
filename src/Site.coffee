@@ -5,6 +5,7 @@ path = require 'path'
 module.exports = class Site
   constructor: (@clean={}, @configureJson) ->
     @dir = null
+    @id = null
     @skipStrigoifile = false
     @useDocs = null
     @findIgnorePatterns = []
@@ -53,7 +54,8 @@ module.exports = class Site
       @useDocs = [path.basename full]
     else
       @dir = path.resolve process.cwd(), opts.dir
-    @log "Using dir '#{@dir}'."
+    @id = path.basename @dir
+    @log 'Starting.'
     @process cb
 
   process: (cb) ->
@@ -84,7 +86,7 @@ module.exports = class Site
     @dirJoin(@genDir) + '/' + name
 
   log: (str) ->
-    console.log str
+    console.log @id + ': ' + str.split('\n').join "\n#{@id}: "
 
   configure: (cs) ->
     for key, value of cs
@@ -98,15 +100,15 @@ module.exports = class Site
 
   spawn: (name, args, cb) ->
     s = spawn name, args
-    s.stdout.on 'data', (data) -> process.stdout.write data
-    s.stderr.on 'data', (data) -> process.stderr.write data
+    s.stdout.on 'data', (data) => @log data
+    s.stderr.on 'data', (data) => @log data
     s.on 'close', (code) ->
       cb 'err-' + code unless code is 0
       cb()
 
   exec: (script, cb) ->
-    exec script, (err, stdout, stderr) ->
-      process.stdout.write stdout
-      process.stderr.write stderr
+    exec script, (err, stdout, stderr) =>
+      @log stdout
+      @log stderr
       return cb err if err
       cb()
