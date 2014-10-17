@@ -28,6 +28,9 @@ module.exports = class Site
       '--shorten-ids'
       '--strip-xml-prolog'
     ]
+    @indexFileTypes = [
+      '.strig'
+    ]
     @arrayOptions =
       findIgnorePatterns: true
       npmPackages: true
@@ -35,11 +38,14 @@ module.exports = class Site
       rsync: true
       scourOptions: true
       processors: true
+      indexFileTypes: true
     @objectOptions =
       minifyHtmlOptions: true
     @docs = new (require './proc/DocumentsProcessor') @
+    @files = new (require './proc/FilesProcessor') @
     @processors = [
       new (require './proc/StrigoifileProcessor') @
+      @files
       new (require './proc/CleanupProcessor') @
       new (require './proc/PackageProcessor') @
       new (require './proc/RsyncProcessor') @
