@@ -1,3 +1,6 @@
+async = require 'async'
+fse = require 'fs-extra'
+path = require 'path'
 recursive = require 'recursive-readdir'
 
 module.exports = class FilesProcessor extends require './Processor'
@@ -7,6 +10,9 @@ module.exports = class FilesProcessor extends require './Processor'
     @types = {}
 
   init: (cb) ->
+    @selfSeries [@findFiles, @tmpSyncFiles], cb
+
+  findFiles: (cb) ->
     ignore = @site.findIgnorePatterns.concat @site.genDir, @site.tmpDir
     recursive @site.dir, ignore, (err, files) =>
       return cb err if err
@@ -19,3 +25,13 @@ module.exports = class FilesProcessor extends require './Processor'
             @types[e].push f
             break
       cb()
+
+  tmpSyncFiles: (cb) ->
+    proc = (f, cb) =>
+      relative = path.relative @site.dir, f
+      try fs.mkdirSync path.dirname relative
+      fse.copy f, @site.dirJoins(@site.tmpDir, relative), cb
+    files = []
+    for type in @site.tmpSyncFileTypes
+      files.push.apply files, @types[type]
+    async.map files, proc, cb

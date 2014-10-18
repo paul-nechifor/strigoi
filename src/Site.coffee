@@ -32,6 +32,9 @@ module.exports = class Site
       '.strig'
       '.jade'
     ]
+    @tmpSyncFileTypes = [
+      '.jade'
+    ]
     @arrayOptions =
       findIgnorePatterns: true
       npmPackages: true
@@ -40,6 +43,7 @@ module.exports = class Site
       scourOptions: true
       processors: true
       indexFileTypes: true
+      tmpSyncFileTypes: true
     @objectOptions =
       minifyHtmlOptions: true
     @docs = new (require './proc/DocumentsProcessor') @
@@ -48,7 +52,6 @@ module.exports = class Site
       new (require './proc/StrigoifileProcessor') @
       new (require './proc/CleanupProcessor') @
       @files
-      new (require './proc/JadeProcessor') @
       new (require './proc/PackageProcessor') @
       new (require './proc/RsyncProcessor') @
       @docs
