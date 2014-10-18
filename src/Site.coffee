@@ -1,4 +1,5 @@
 async = require 'async'
+fs = require 'fs'
 path = require 'path'
 {exec, spawn} = require 'child_process'
 
@@ -95,6 +96,11 @@ module.exports = class Site
 
   toPath: (name) ->
     @dirJoin(@genDir) + '/' + name
+
+  writeFile: (file, data, cb) ->
+    fs.mkdir path.dirname(file), (err) ->
+      # Ignore error.
+      fs.writeFile file, data, cb
 
   log: (str) ->
     console.log @id + ': ' + str.split('\n').join "\n#{@id}: "

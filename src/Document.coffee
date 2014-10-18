@@ -1,9 +1,11 @@
+LatexEnv = require './LatexEnv'
 async = require 'async'
 fs = require 'fs'
 jade = require 'jade'
+nib = require 'nib'
 path = require 'path'
+stylus = require 'stylus'
 yaml = require 'js-yaml'
-LatexEnv = require './LatexEnv'
 
 module.exports = class Document
   partTypes =
@@ -85,10 +87,7 @@ module.exports = class Document
 
   save: (html, cb) ->
     file = @site.dirJoins @site.genDir, @id + '.html'
-    parent = path.dirname file
-    fs.mkdir parent, (err) =>
-      # Ignore error.
-      fs.writeFile file, html, cb
+    @site.writeFile file, html, cb
 
 class StrigoiExports
   constructor: (@doc) ->
@@ -111,6 +110,36 @@ class AsyncFunctionSet
     file = @doc.site.fromPath opts[0]
     fs.readFile file, {encoding: 'utf8'}, cb
 
+  joinFiles: (args, cb) ->
+    files = args.map (f) => @doc.site.fromPath f
+    read = (f, cb) ->
+      fs.readFile f, {encoding: 'utf8'}, (err, data) ->
+        return cb err if err
+        data += '\n' if data[data.length - 1] isnt '\n'
+        cb null, data
+
   renderJadeFile: (opts, cb) ->
     file = path.resolve @doc.site.dir, opts[0]
     cb null, jade.renderFile file, opts[1]
+
+  renderStylusFile: (args, cb) ->
+    file = @doc.site.fromPath args[0]
+    opts = args[1] or {}
+    fs.readFile file, {encoding: 'utf8'}, (err, data) =>
+      return cb err if err
+      s = stylus data
+      .include nib.path
+      .set 'filename', file
+      s.set 'include css', true if opts.includeCss
+      s.render (err, css) =>
+        return cb err if err
+        css = @doc.async[opts.includeBefore] + css if opts.includeBefore
+        css += @doc.async[opts.includeAfter] if opts.includeAfter
+        cb null, css
+
+  bundleStylus: (args, cb) ->
+    [from, to, opts] = args
+    to = @doc.site.toPath to
+    @renderStylusFile [from, opts], (err, css) =>
+      return cb err if err
+      @doc.site.writeFile to, css, cb
