@@ -8,6 +8,8 @@ module.exports = class Markdown extends require './Part'
   constructor: ->
     super
 
+  @extension = '.md'
+
   render: (opts, cb) ->
     html = marked @str
     html = minifyHtml html, @doc.site.minifyHtmlOptions

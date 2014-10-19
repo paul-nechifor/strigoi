@@ -9,6 +9,8 @@ module.exports = class Jade extends require './Part'
       doc: @doc
       strigoi: @doc.exports
 
+  @extension = '.jade'
+
   load: (cb) ->
     @fn = jade.compile @str, {}
     cb()

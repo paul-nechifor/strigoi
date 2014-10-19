@@ -1,5 +1,6 @@
 async = require 'async'
 fs = require 'fs'
+fse = require 'fs-extra'
 path = require 'path'
 {exec, spawn} = require 'child_process'
 require 'coffee-script/register'
@@ -15,6 +16,7 @@ module.exports = class Site
     @genDir = 'generated'
     @tmpDir = '.strigoi-tmp'
     @modulesDir = 'modules' # Relative to @tmpDir
+    @idsDir = 'by-id' # Relative to @tmpDir
     @npmPackages = []
     @bowerPackages = []
     @minifyHtmlOptions =
@@ -106,7 +108,7 @@ module.exports = class Site
     @dirJoin(@genDir) + '/' + name
 
   writeFile: (file, data, cb) ->
-    fs.mkdir path.dirname(file), (err) ->
+    fse.mkdirp path.dirname(file), (err) ->
       # Ignore error.
       fs.writeFile file, data, cb
 

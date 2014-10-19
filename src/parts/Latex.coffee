@@ -5,6 +5,8 @@ module.exports = class Latex extends require './Part'
   constructor: ->
     super
 
+  @extension = '.tex'
+
   render: (opts, cb) ->
     tmp.dir (err, path) =>
       return cb err if err

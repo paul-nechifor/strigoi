@@ -37,7 +37,9 @@ module.exports = class Document
     parts = @data.split '\n---\n'
     for i in [0 .. parts.length - 1] by 2
       @addPart parts[i], parts[i + 1]
-    @loadParts cb
+    @loadParts (err) =>
+      return cb err if err
+      @writeIds cb
 
   addPart: (dataStr, str) ->
     data = yaml.safeLoad dataStr
@@ -68,6 +70,14 @@ module.exports = class Document
   loadParts: (cb) ->
     f = (p, cb) -> p.load cb
     async.mapSeries @parts, f, cb
+
+  writeIds: (cb) ->
+    root = @site.fromTmpPath @site.idsDir
+    writePart = (p, cb) =>
+      file = "#{root}/#{@id}/#{p.data.id}#{p.constructor.extension}"
+      @site.writeFile file, p.str, cb
+    parts = @parts.filter (p) -> p.data.id
+    async.map parts, writePart, cb
 
   loadAsync: (cb) ->
     renderAsync = (a, cb) =>
@@ -124,6 +134,7 @@ class AsyncFunctionSet
     locals =
       doc: @doc
       strigoi: @doc.exports
+      filename: file
     cb null, jade.renderFile file, @doc.site.merge opts[1], locals
 
   renderStylusFile: (args, cb) ->

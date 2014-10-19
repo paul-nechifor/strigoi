@@ -5,6 +5,8 @@ module.exports = class Yaml extends require './Part'
     super
     @content = null
 
+  @extension = '.yaml'
+
   load: (cb) ->
     @content = yaml.safeLoad @str
     @doc.yaml[@data.id] = @content if @data.id
