@@ -11,9 +11,6 @@ module.exports = class Jade extends require './Part'
 
   @extension = '.jade'
 
-  load: (cb) ->
-    @fn = jade.compile @str, {}
-    cb()
-
   render: (opts, cb) ->
+    @fn = jade.compile @str, {} unless @fn
     cb null, @fn @doc.site.merge opts, @locals
