@@ -104,6 +104,7 @@ class StrigoiExports
   constructor: (@doc) ->
     @async = @doc.async
     @yaml = @doc.yaml
+    @mod = @doc.site.modules
 
 class AsyncFunctionSet
   constructor: (@doc) ->
