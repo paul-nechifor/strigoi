@@ -4,6 +4,7 @@ path = require 'path'
 
 module.exports = class RsyncProcessor extends require './Processor'
   run: (cb) ->
+    return cb() unless @site.command is 'build'
     rsync = (r, cb) =>
       opts = ['-a']
       froms = null

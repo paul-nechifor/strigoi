@@ -1,4 +1,4 @@
-fs = require 'fs'
+fse = require 'fs-extra'
 
 module.exports = class CleanupProcessor extends require './Processor'
   init: (cb) ->
@@ -11,14 +11,16 @@ module.exports = class CleanupProcessor extends require './Processor'
     ], cb
 
   cleanupGen: (cb) ->
-    return cb() unless @site.clean['gen']
-    @site.spawn 'rm', ['-fr', @genDir], cb
+    return cb() unless @site.command is 'clean' and @site.opts.clean.gen
+    @site.log "Removing tmp dir: '#{@genDir}'."
+    fse.remove @genDir, cb
 
   cleanupTmp: (cb) ->
-    return cb() unless @site.clean['tmp']
-    @site.spawn 'rm', ['-fr', @tmpDir], cb
+    return cb() unless @site.command is 'clean' and @site.opts.clean.tmp
+    @site.log "Removing gen dir: '#{@tmpDir}'."
+    fse.remove @tmpDir, cb
 
   recreate: (cb) ->
-    fs.mkdir @genDir, 0o755, =>
-      fs.mkdir @tmpDir, 0o755, ->
+    fse.mkdirp @genDir, 0o755, =>
+      fse.mkdirp @tmpDir, 0o755, ->
         cb() # Ignore errors.

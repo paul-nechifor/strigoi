@@ -3,6 +3,7 @@ fs = require 'fs'
 
 module.exports = class PackageProcessor extends require './Processor'
   init2: (cb) ->
+    return cb() unless @site.command is 'install'
     repeat = =>
       @installPackages (err) =>
         return cb err if err

@@ -6,15 +6,15 @@ path = require 'path'
 require 'coffee-script/register'
 
 module.exports = class Site
-  constructor: (@clean={}, @configureJson) ->
+  constructor: (@opts) ->
     @dir = null
     @id = null
     @skipStrigoifile = false
     @useDocs = null
     @modules = {}
     @findIgnorePatterns = []
-    @genDir = 'generated'
-    @tmpDir = '.strigoi-tmp'
+    @genDir = 'strigoi-gen'
+    @tmpDir = 'strigoi-tmp'
     @modulesDir = 'modules' # Relative to @tmpDir
     @idsDir = 'by-id' # Relative to @tmpDir
     @npmPackages = []
@@ -64,20 +64,28 @@ module.exports = class Site
       new (require './proc/RsyncProcessor') @
       @docs
     ]
-
-  init: (opts, cb) ->
-    if opts.file
-      full = path.resolve process.cwd(), opts.file
+    @command = null
+    if @opts.file
+      full = path.resolve process.cwd(), @opts.file
       @dir = path.dirname full
       @skipStrigoifile = true
       @useDocs = [path.basename full]
     else
-      @dir = path.resolve process.cwd(), opts.dir
+      @dir = path.resolve process.cwd(), @opts.dir
     @id = path.basename @dir
+
+  run: (cb) ->
     @log 'Starting.'
-    @process cb
+    @process (err) =>
+      return cb err if err
+      @log 'Done.'
 
   process: (cb) ->
+    if @opts.clean.gen or @opts.clean.tmp
+      @command = 'clean'
+    else
+      @command = 'build'
+    @log "Executing command #{@command}."
     @successiveCalls @processors, ['init', 'init2', 'run', 'finish'], cb
 
   successiveCalls: (array, methods, cb) ->

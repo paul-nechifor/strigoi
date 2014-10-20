@@ -9,8 +9,8 @@ module.exports = class DocumentsProcessor extends require './Processor'
     err = @initFile()
     return cb err if err
 
-    if @site.configureJson
-      @site.configure JSON.parse @site.configureJson
+    if @site.opts.configure
+      @site.configure JSON.parse @site.opts.configure
 
     @runFunc 'init', cb
 

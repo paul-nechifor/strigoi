@@ -27,6 +27,7 @@ module.exports = class FilesProcessor extends require './Processor'
       cb()
 
   tmpSyncFiles: (cb) ->
+    return cb() unless @site.command is 'build'
     proc = (f, cb) =>
       relative = path.relative @site.dir, f
       try fs.mkdirSync path.dirname relative

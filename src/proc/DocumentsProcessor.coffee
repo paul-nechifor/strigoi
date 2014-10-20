@@ -17,4 +17,5 @@ module.exports = class DocumentsProcessor extends require './Processor'
     @site.successiveCalls @docList, ['init', 'load'], cb
 
   run: (cb) ->
+    return cb() unless @site.command is 'build'
     @site.successiveCalls @docList, ['loadAsync', 'write'], cb
