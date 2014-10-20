@@ -4,11 +4,11 @@ module.exports = class CleanupProcessor extends require './Processor'
   init: (cb) ->
     @genDir = @site.dirJoin @site.genDir
     @tmpDir = @site.dirJoin @site.tmpDir
-    @selfSeries [
-      @cleanupGen
-      @cleanupTmp
-      @recreate
-    ], cb
+    if @site.command is 'install'
+      return @recreate cb
+    if @site.command is 'clean'
+      return @selfSeries [@cleanupGen, @cleanupTmp], cb
+    cb()
 
   cleanupGen: (cb) ->
     return cb() unless @site.command is 'clean' and @site.opts.clean.gen

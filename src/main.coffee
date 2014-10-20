@@ -9,6 +9,9 @@ module.exports = main = ->
   .alias 'clean', 'c'
   .describe 'clean', 'Clean both generated and temporary files and exit.'
 
+  .alias 'install', 'i'
+  .describe 'install', 'Install the packages/modules.'
+
   .describe 'clean-gen', 'Clean generated files and exit.'
 
   .describe 'clean-tmp', 'Clean temporary files and exit.'
@@ -34,6 +37,7 @@ module.exports = main = ->
     clean:
       gen: argv['clean-gen'] or argv.clean
       tmp: argv['clean-tmp'] or argv.clean
+    install: argv.install
     configure: argv.configure
 
   if argv._.length is 1

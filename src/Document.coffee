@@ -89,6 +89,7 @@ module.exports = class Document
     async.mapSeries @asyncsToLoad, renderAsync, cb
 
   write: (cb) ->
+    @site.log "Building doc '#{@id}'."
     @buildHtml (err, html) =>
       return cb err if err
       @save html, cb

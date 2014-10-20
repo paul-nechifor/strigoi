@@ -83,6 +83,8 @@ module.exports = class Site
   process: (cb) ->
     if @opts.clean.gen or @opts.clean.tmp
       @command = 'clean'
+    else if @opts.install
+      @command = 'install'
     else
       @command = 'build'
     @log "Executing command #{@command}."

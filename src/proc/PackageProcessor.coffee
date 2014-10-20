@@ -1,27 +1,34 @@
 async = require 'async'
-fs = require 'fs'
+fse = require 'fs-extra'
 
 module.exports = class PackageProcessor extends require './Processor'
   init2: (cb) ->
-    return cb() unless @site.command is 'install'
-    repeat = =>
-      @installPackages (err) =>
-        return cb err if err
-        @initModules (err) =>
-          return cb err if err
-          return cb null if @noMorePackages()
-          setTimeout repeat, 0
-    fs.mkdir @site.dirJoins(@site.tmpDir, @site.modulesDir), (err) ->
-      #Ignore error.
-      repeat()
+    switch @site.command
+      when 'build' then @initModules cb
+      when 'install'
+        @createModulesDir (err) =>
+          #Ignore error.
+          @installAndInit cb
+      else cb()
 
-  noMorePackages: -> @site.npmPackages.length + @site.bowerPackages.length is 0
+  createModulesDir: (cb) ->
+    fse.mkdirp @site.dirJoins(@site.tmpDir, @site.modulesDir), cb
+
+  installAndInit: (cb) ->
+    moreLeft = => @site.npmPackages.length + @site.bowerPackages.length > 0
+    installAndInitPartialPackages = (cb) =>
+      @installPartialPackages (err) =>
+        return cb err if err
+        @initModules cb
+    async.whilst moreLeft, installAndInitPartialPackages, cb
 
   initModules: (cb) ->
-    modules = @site.useModules
-    return cb() if modules.length is 0
-    @site.useModules = []
-    async.mapSeries modules, @initModule.bind(@), cb
+    moreLeft = => @site.useModules.length > 0
+    initPartialModules = (cb) =>
+      modules = @site.useModules
+      @site.useModules = []
+      async.mapSeries modules, @initModule.bind(@), cb
+    async.whilst moreLeft, initPartialModules, cb
 
   initModule: (opts, cb) ->
     from = @site.fromPath opts.path
@@ -30,15 +37,15 @@ module.exports = class PackageProcessor extends require './Processor'
     catch err
       return cb err
     @site.modules[mod.name] = mod
+    @site.log "Init module '#{mod.name}'."
     mod.init @site, opts, (err) =>
       return cb err if err
       modLinkDir = @site.dirJoins @site.tmpDir, @site.modulesDir, mod.name
-      fs.symlink from, modLinkDir, (err) ->
+      fse.symlink from, modLinkDir, (err) ->
         # Ignore for now.
         cb()
 
-  installPackages: (cb) ->
-    return cb() if @noMorePackages()
+  installPartialPackages: (cb) ->
     lines = ["cd '#{@site.dirJoin @site.tmpDir}'"]
     if @site.npmPackages.length > 0
       lines.push "npm install --prefix . #{@site.npmPackages.join ' '}"
