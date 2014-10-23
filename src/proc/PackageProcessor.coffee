@@ -1,4 +1,5 @@
 async = require 'async'
+errors = require '../errors'
 fse = require 'fs-extra'
 
 module.exports = class PackageProcessor extends require './Processor'
@@ -35,7 +36,10 @@ module.exports = class PackageProcessor extends require './Processor'
     try
       mod =  require from + '/strigoi-module.coffee'
     catch err
-      return cb err
+      if err.code is 'MODULE_NOT_FOUND'
+        return cb errors.create 'module-not-found', module: opts.path
+      else
+        return cb err
     @site.modules[mod.name] = mod
     @site.log "Init module '#{mod.name}'."
     mod.init @site, opts, (err) =>
