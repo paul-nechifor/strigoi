@@ -112,7 +112,7 @@ module.exports = class Site
     @dir + '/' + name
 
   fromTmpPath: (name) ->
-    @dirJoin(@tmpDir) + '/' + name
+    path.resolve @dirJoin(@tmpDir), name
 
   toPath: (name) ->
     @dirJoin(@genDir) + '/' + name

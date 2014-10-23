@@ -73,10 +73,8 @@ module.exports = class Document
 
   writeIds: (cb) ->
     return cb() unless @site.command is 'build'
-    root = @site.fromTmpPath @site.idsDir
     writePart = (p, cb) =>
-      file = "#{root}/#{@id}/#{p.data.id}#{p.constructor.extension}"
-      @site.writeFile file, p.str, cb
+      @site.writeFile p.filePath(), p.str, cb
     parts = @parts.filter (p) -> p.data.id
     async.map parts, writePart, cb
 

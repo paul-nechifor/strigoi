@@ -12,5 +12,9 @@ module.exports = class Jade extends require './Part'
   @extension = '.jade'
 
   render: (opts, cb) ->
+    return @renderId opts, cb if @data.id
     @fn = jade.compile @str, {} unless @fn
     cb null, @fn @doc.site.merge opts, @locals
+
+  renderId: (opts, cb) ->
+    @doc.asyncFunctionSet.renderJadeFile [@filePath(), opts], cb
