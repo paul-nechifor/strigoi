@@ -2,8 +2,8 @@ fse = require 'fs-extra'
 
 module.exports = class CleanupProcessor extends require './Processor'
   init: (cb) ->
-    @genDir = @site.dirJoin @site.genDir
-    @tmpDir = @site.dirJoin @site.tmpDir
+    @genDir = @site.path '@gen'
+    @tmpDir = @site.path '@tmp'
     if @site.command is 'install'
       return @recreate cb
     if @site.command is 'clean'

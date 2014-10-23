@@ -16,9 +16,7 @@ module.exports = class DocumentsProcessor extends require './Processor'
 
   initFile: ->
     return if @site.skipStrigoifile
-
-    file = @site.dirJoin 'strigoifile.coffee'
-    return unless fs.existsSync file
+    return unless fs.existsSync @site.path '@dir/strigoifile.coffee'
 
     try
       @strigoifile = require file

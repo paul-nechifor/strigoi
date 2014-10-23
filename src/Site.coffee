@@ -1,4 +1,5 @@
 async = require 'async'
+errors = require './errors'
 fs = require 'fs'
 fse = require 'fs-extra'
 path = require 'path'
@@ -17,6 +18,14 @@ module.exports = class Site
     @tmpDir = 'strigoi-tmp'
     @modulesDir = 'modules' # Relative to @tmpDir
     @idsDir = 'by-id' # Relative to @tmpDir
+    @dirVars =
+      bower: => path.resolve @dirVars.tmp(), 'bower_components'
+      dir: => @dir
+      gen: => path.resolve @dir, @genDir
+      ids: => path.resolve @dirVars.tmp(), @idsDir
+      modules: => path.resolve @dirVars.tmp(), @modulesDir
+      npm: => path.resolve @dirVars.tmp(), 'node_modules'
+      tmp: => path.resolve @dir, @tmpDir
     @npmPackages = []
     @bowerPackages = []
     @minifyHtmlOptions =
@@ -98,25 +107,6 @@ module.exports = class Site
     f = (x, cb) -> x[method] cb
     async.mapSeries array, f, cb
 
-  dirJoin: (part) ->
-    path.join @dir, part
-
-  dirJoins: ->
-    parts = Array.prototype.slice.call arguments, 0
-    parts.splice 0, 0, @dir
-    path.join.apply path.join, parts
-
-  fromPath: (name) ->
-    name = name.replace /^@bower/, @tmpDir + '/bower_components'
-    name = name.replace /^@npm/, @tmpDir + '/node_modules'
-    @dir + '/' + name
-
-  fromTmpPath: (name) ->
-    path.resolve @dirJoin(@tmpDir), name
-
-  toPath: (name) ->
-    @dirJoin(@genDir) + '/' + name
-
   writeFile: (file, data, cb) ->
     fse.mkdirp path.dirname(file), (err) ->
       # Ignore error.
@@ -134,6 +124,16 @@ module.exports = class Site
       else
         @[key] = value
     return
+
+  path: (file, optionalStart) ->
+    file.replace /^@(\w+)/i, (m, name) =>
+      if @dirVars[name]
+        ret = @dirVars[name]()
+        if optionalStart
+          return path.resolve @path(optionalStart), ret
+        else
+          return ret
+      throw errors.create 'unknown-dir-shortcut', name: name, full: file
 
   spawn: (name, args, cb) ->
     s = spawn name, args

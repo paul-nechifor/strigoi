@@ -97,7 +97,7 @@ module.exports = class Document
     @asyncFunctionSet.innerDoc {}, cb
 
   save: (html, cb) ->
-    file = @site.dirJoins @site.genDir, @id + '.html'
+    file = @site.path "@gen/#{@id}.html"
     @site.writeFile file, html, cb
 
 class StrigoiExports
@@ -119,11 +119,11 @@ class AsyncFunctionSet
       cb null, results.join ''
 
   readFile: (opts, cb) ->
-    file = @doc.site.fromPath opts[0]
+    file = @doc.site.path opts[0], '@dir'
     fs.readFile file, {encoding: 'utf8'}, cb
 
   joinFiles: (args, cb) ->
-    files = args.map (f) => @doc.site.fromPath f
+    files = args.map (f) => @doc.site.path f, '@dir'
     read = (f, cb) ->
       fs.readFile f, {encoding: 'utf8'}, (err, data) ->
         return cb err if err
@@ -131,7 +131,7 @@ class AsyncFunctionSet
         cb null, data
 
   renderJadeFile: (opts, cb) ->
-    file = @doc.site.fromTmpPath opts[0]
+    file = @doc.site.path opts[0], '@tmp'
     locals =
       doc: @doc
       strigoi: @doc.exports
@@ -139,7 +139,7 @@ class AsyncFunctionSet
     cb null, jade.renderFile file, @doc.site.merge opts[1], locals
 
   renderStylusFile: (args, cb) ->
-    file = @doc.site.fromPath args[0]
+    file = @doc.site.path opts[0], '@dir'
     opts = args[1] or {}
     fs.readFile file, {encoding: 'utf8'}, (err, data) =>
       return cb err if err
@@ -155,7 +155,7 @@ class AsyncFunctionSet
 
   bundleStylus: (args, cb) ->
     [from, to, opts] = args
-    to = @doc.site.toPath to
+    to = @doc.site.path to, '@gen'
     @renderStylusFile [from, opts], (err, css) =>
       return cb err if err
       @doc.site.writeFile to, css, cb

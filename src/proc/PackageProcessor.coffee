@@ -13,7 +13,7 @@ module.exports = class PackageProcessor extends require './Processor'
       else cb()
 
   createModulesDir: (cb) ->
-    fse.mkdirp @site.dirJoins(@site.tmpDir, @site.modulesDir), cb
+    fse.mkdirp @site.path('@modules'), cb
 
   installAndInit: (cb) ->
     moreLeft = => @site.npmPackages.length + @site.bowerPackages.length > 0
@@ -32,7 +32,7 @@ module.exports = class PackageProcessor extends require './Processor'
     async.whilst moreLeft, initPartialModules, cb
 
   initModule: (opts, cb) ->
-    from = @site.fromPath opts.path
+    from = @site.path opts.path, '@dir'
     try
       mod =  require from + '/strigoi-module.coffee'
     catch err
@@ -44,13 +44,12 @@ module.exports = class PackageProcessor extends require './Processor'
     @site.log "Init module '#{mod.name}'."
     mod.init @site, opts, (err) =>
       return cb err if err
-      modLinkDir = @site.dirJoins @site.tmpDir, @site.modulesDir, mod.name
-      fse.symlink from, modLinkDir, (err) ->
+      fse.symlink from, @site.path("@modules/#{mod.name}"), (err) ->
         # Ignore for now.
         cb()
 
   installPartialPackages: (cb) ->
-    lines = ["cd '#{@site.dirJoin @site.tmpDir}'"]
+    lines = ["cd '#{@site.path '@tmp'}'"]
     if @site.npmPackages.length > 0
       lines.push "npm install --prefix . #{@site.npmPackages.join ' '}"
     if @site.bowerPackages.length > 0

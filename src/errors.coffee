@@ -1,6 +1,8 @@
 types =
   'module-not-found': (t, o) ->
     "Module '#{o.module}' not found. Did you run the install step?"
+  'unknown-dir-shortcut': (t, o) ->
+    "Unknown dir shortcut: '#{o.name}' in '#{o.full}'."
 
 exports.create = (type, opts, err) ->
   errType = types[type]

@@ -20,8 +20,8 @@ module.exports = class RsyncProcessor extends require './Processor'
           froms = [r.from]
         to = r.to
 
-      froms = froms.map (f) => @site.fromPath f
-      to = @site.toPath to
+      froms = froms.map (f) => @site.path f, '@dir'
+      to = @site.path '@gen/' + to
 
       fs.mkdir path.dirname(to), (err) =>
         # Ignore error.

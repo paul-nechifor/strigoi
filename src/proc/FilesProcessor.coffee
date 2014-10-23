@@ -31,7 +31,7 @@ module.exports = class FilesProcessor extends require './Processor'
     proc = (f, cb) =>
       relative = path.relative @site.dir, f
       try fs.mkdirSync path.dirname relative
-      fse.copy f, @site.dirJoins(@site.tmpDir, relative), cb
+      fse.copy f, @site.path('@tmp/' + relative), cb
     files = []
     for type in @site.tmpSyncFileTypes
       files.push.apply files, @types[type]
