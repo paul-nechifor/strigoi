@@ -46,7 +46,7 @@ module.exports = class Document
     Part = partTypes[data.type]
     unless Part?
       return cb 'Unkown part type: ' + data.type
-    part = new Part @, data, str
+    part = new Part @, data, str, @parts.length
     @parts.push part
     @partsIds[data.id] = part if data.id?
     if data.main
@@ -73,10 +73,8 @@ module.exports = class Document
 
   writeIds: (cb) ->
     return cb() unless @site.command is 'build'
-    writePart = (p, cb) =>
-      @site.writeFile p.filePath(), p.str, cb
-    parts = @parts.filter (p) -> p.data.id
-    async.map parts, writePart, cb
+    writePart = (p, cb) => p.writePart cb
+    async.map @parts, writePart, cb
 
   loadAsync: (cb) ->
     renderAsync = (a, cb) =>

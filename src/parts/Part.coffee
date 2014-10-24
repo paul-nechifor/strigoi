@@ -1,10 +1,14 @@
 module.exports = class Part
-  constructor: (@doc, @data, @str) ->
+  constructor: (@doc, @data, @str, @index) ->
 
   @extension = ''
 
   filePath: ->
-    @doc.site.path "@ids/#{@doc.id}/#{@data.id}#{@constructor.extension}"
+    name = @data.id or @index
+    @doc.site.path "@ids/#{@doc.id}/#{name}#{@constructor.extension}"
+
+  writePart: (cb) ->
+    @doc.site.writeFile @filePath(), @str, cb
 
   load: (cb) -> cb()
 
