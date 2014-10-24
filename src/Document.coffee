@@ -15,6 +15,7 @@ module.exports = class Document
     jade: require './parts/Jade'
     latex: require './parts/Latex'
     md: require './parts/Markdown'
+    stylus: require './parts/Stylus'
     yaml: require './parts/Yaml'
 
   constructor: (@docs, @site, @id, @src) ->
@@ -133,6 +134,9 @@ class AsyncFunctionSet
         data += '\n' if data[data.length - 1] isnt '\n'
         cb null, data
 
+  renderPart: (args, cb) ->
+    @doc.part[args[0]].render args[1] or {}, cb
+
   renderJadeFile: (args, cb) ->
     file = @doc.site.path args[0], '@tmp'
     locals =
@@ -143,14 +147,16 @@ class AsyncFunctionSet
 
   renderStylusFile: (args, cb) ->
     file = @doc.site.path args[0], '@dir'
-    opts = args[1] or {}
+    opts = @doc.site.stylusOptions
+    opts = @doc.site.merge opts, args[1] if args[1]
     fs.readFile file, {encoding: 'utf8'}, (err, data) =>
       return cb err if err
-      s = stylus data
+      stylus data
       .include nib.path
       .set 'filename', file
-      s.set 'include css', true if opts.includeCss
-      s.render (err, css) =>
+      .set 'compress', !!opts.compress
+      .set 'include css', !!opts.includeCss
+      .render (err, css) =>
         return cb err if err
         css = @doc.async[opts.includeBefore] + css if opts.includeBefore
         css += @doc.async[opts.includeAfter] if opts.includeAfter

@@ -34,6 +34,8 @@ module.exports = class Site
       caseSensitive: true
     @markedOptions =
       smartypants: true
+    @stylusOptions =
+      compress: true
     @rsync = []
     @useModules = []
     @scourOptions = [
