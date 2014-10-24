@@ -3,6 +3,7 @@ async = require 'async'
 errors = require './errors'
 fs = require 'fs'
 jade = require 'jade'
+minifyHtml = require('html-minifier').minify
 nib = require 'nib'
 path = require 'path'
 stylus = require 'stylus'
@@ -87,6 +88,7 @@ module.exports = class Document
     @site.log "Building doc '#{@id}'."
     @buildHtml (err, html) =>
       return cb err if err
+      html = minifyHtml html, @site.minifyHtmlOptions
       @save html, cb
 
   buildHtml: (cb) ->
