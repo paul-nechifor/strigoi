@@ -126,14 +126,13 @@ module.exports = class Site
     return
 
   path: (file, optionalStart) ->
-    file.replace /^@(\w+)/i, (m, name) =>
-      if @dirVars[name]
-        ret = @dirVars[name]()
-        if optionalStart
-          return path.resolve @path(optionalStart), ret
-        else
-          return ret
+    ret = file.replace /^@(\w+)/i, (m, name) =>
+      return @dirVars[name]() if @dirVars[name]
       throw errors.create 'unknown-dir-shortcut', name: name, full: file
+    if optionalStart
+      path.resolve @path(optionalStart), ret
+    else
+      ret
 
   spawn: (name, args, cb) ->
     s = spawn name, args
