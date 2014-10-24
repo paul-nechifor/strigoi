@@ -32,6 +32,8 @@ module.exports = class Site
       removeComments: true
       collapseWhitespace: true
       caseSensitive: true
+    @markedOptions =
+      smartypants: true
     @rsync = []
     @useModules = []
     @scourOptions = [
@@ -62,6 +64,7 @@ module.exports = class Site
       tmpSyncFileTypes: true
       useModules: true
     @objectOptions =
+      markedOptions: true
       minifyHtmlOptions: true
     @docs = new (require './proc/DocumentsProcessor') @
     @files = new (require './proc/FilesProcessor') @
@@ -149,8 +152,9 @@ module.exports = class Site
       return cb err if err
       cb()
 
-  merge: (a, b) ->
+  merge: ->
     merged = {}
-    merged[key] = value for key, value of a
-    merged[key] = value for key, value of b
+    for obj in arguments
+      for key, value of obj
+        merged[key] = value
     merged
