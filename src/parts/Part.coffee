@@ -8,6 +8,7 @@ module.exports = class Part
     @doc.site.path "@ids/#{@doc.id}/#{name}#{@constructor.extension}"
 
   writePart: (cb) ->
+    return cb() unless @doc.site.command is 'build'
     @doc.site.writeFile @filePath(), @str, cb
 
   load: (cb) -> cb()
