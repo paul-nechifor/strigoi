@@ -110,7 +110,7 @@ class StrigoiExports
 class AsyncFunctionSet
   constructor: (@doc) ->
 
-  innerDoc: (opts, cb) ->
+  innerDoc: (args, cb) ->
     f = (p, cb) ->
       return cb null, '' if p.data.exclude or p.data.main
       p.render {}, cb
@@ -119,8 +119,8 @@ class AsyncFunctionSet
       return cb err if err
       cb null, results.join ''
 
-  readFile: (opts, cb) ->
-    file = @doc.site.path opts[0], '@dir'
+  readFile: (args, cb) ->
+    file = @doc.site.path args[0], '@dir'
     fs.readFile file, {encoding: 'utf8'}, cb
 
   joinFiles: (args, cb) ->
@@ -131,16 +131,16 @@ class AsyncFunctionSet
         data += '\n' if data[data.length - 1] isnt '\n'
         cb null, data
 
-  renderJadeFile: (opts, cb) ->
-    file = @doc.site.path opts[0], '@tmp'
+  renderJadeFile: (args, cb) ->
+    file = @doc.site.path args[0], '@tmp'
     locals =
       doc: @doc
       strigoi: @doc.exports
       filename: file
-    cb null, jade.renderFile file, @doc.site.merge opts[1], locals
+    cb null, jade.renderFile file, @doc.site.merge args[1], locals
 
   renderStylusFile: (args, cb) ->
-    file = @doc.site.path opts[0], '@dir'
+    file = @doc.site.path args[0], '@dir'
     opts = args[1] or {}
     fs.readFile file, {encoding: 'utf8'}, (err, data) =>
       return cb err if err
