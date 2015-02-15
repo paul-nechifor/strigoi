@@ -1,27 +1,16 @@
 {
   "name": "strigoi",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": "Paul Nechifor <paul@nechifor.net> (http://nechifor.net/)",
-  "main": "./lib",
+  "main": "lib",
   "bin": {
     "strigoi": "./bin/strigoi.js"
   },
   "scripts": {
-    "preinstall": "rm -fr lib/*; coffee -cbo lib src"
+    "postinstall": "rm -fr lib/*; coffee -cbo lib src"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "coffee-script": "^1.8.0",
-    "fs-extra": "^0.12.0",
-    "html-minifier": "^0.6.8",
-    "jade": "^1.7.0",
-    "js-yaml": "^3.2.2",
-    "marked": "^0.3.2",
-    "nib": "^1.0.4",
-    "optimist": "^0.6.1",
-    "recursive-readdir": "^1.2.0",
-    "stylus": "^0.49.2",
-    "tmp": "0.0.24"
+    "coffee-script": "^1.8.0"
   },
   "repository": {
     "type": "git",
