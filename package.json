@@ -7,10 +7,15 @@
     "strigoi": "./bin/strigoi.js"
   },
   "scripts": {
-    "postinstall": "rm -fr lib/*; coffee -cbo lib src"
+    "docs": "docco src/index.coffee",
+    "postinstall": "rm -fr lib/*; coffee -cbo lib src",
+    "test": "mocha --compilers coffee:coffee-script/register"
   },
   "dependencies": {
-    "coffee-script": "^1.8.0"
+    "chai": "^2.0.0",
+    "coffee-script": "^1.9.1",
+    "docco": "^0.7.0",
+    "mocha": "^2.1.0"
   },
   "repository": {
     "type": "git",
