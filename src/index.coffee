@@ -31,7 +31,7 @@ exports.File = class File
 
   # This is a builder method for creating the root (a file that has no parent).
   @createRootDir = (dir) ->
-    dir = path.normalize dir
+    dir = path.resolve process.cwd(), dir
     dir = dir.substring 0, dir.length - 1 if dir[dir.length - 1] is '/'
     ret = new File null, path.basename dir
     ret.path = dir
@@ -72,8 +72,7 @@ exports.parseStrigParts = (text) ->
       header = lines.join '\n'
 
     else
-      # Push the previous part unless this is the first header and there isn't
-      # one.
+      # Push the previous part unless this is the first part.
       parts.push header: header, content: lines unless lines is null
 
       header = singleLineHeader if singleLineHeader

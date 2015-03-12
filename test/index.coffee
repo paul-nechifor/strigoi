@@ -1,6 +1,31 @@
+# # Strigoi tests
+
+# ## Requirements
+
 should = require('chai').should()
+mockFs = require 'mock-fs'
 s = require process.env.SRC_REQ or '../src'
 
+# ## Helpful utilities
+
+fsys = (opts, cb) ->
+  {cwd, chdir} = process
+  currentDir = opts.cwd or '/'
+  process.cwd = -> currentDir
+  process.chdir = (dir) -> currentDir = dir
+
+  mockFs opts.mock
+
+  doneCb = ->
+    mockFs.restore()
+    process.cwd = cwd
+    process.chdir = chdir
+
+  cb doneCb
+
+# ## Tests
+
+# ### File
 describe 'File', ->
 
   describe '#createRootDir', ->
@@ -18,6 +43,15 @@ describe 'File', ->
       s.File.createRootDir '/i/am///'
       .path.should.equal '/i/am'
 
+    it 'should use absolute paths', ->
+      fsys
+        config: '/there/once/was': 'a'
+        cwd: '/there'
+      , (cb) ->
+        s.File.createRootDir 'once/'
+        .path.should.equal '/there/once'
+        cb()
+
     it 'should have no parent', ->
       f = s.File.createRootDir '/asdf/ff'
       should.equal f.parent, null
@@ -26,6 +60,7 @@ describe 'File', ->
       f = s.File.createRootDir '/asdf/weoifjwe'
       should.equal f.children, null
 
+# ### parseStrigParts
 describe 'parseStrigParts', ->
 
   it 'should recognize a single multiline header', ->
@@ -149,6 +184,7 @@ describe 'parseStrigParts', ->
       """
     fn.should.throw s.StrigParsingEx, 'header-after-header'
 
+# ### Strigoi
 describe 'Strigoi', ->
 
   describe 'constructor', ->
