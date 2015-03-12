@@ -2,21 +2,14 @@
 
 Multiformat static site generator.
 
-## Install
+## Development
 
-Install the package and its dependencies:
+Clone the repo:
 
-    npm i
+    git clone http://github.com/paul-nechifor/strigoi && cd strigoi
 
-## Documentation
-
-Build the documentation:
-
-    npm run docs
-
-## Tests
-
-Run the tests:
+Install the dependencies, build the docs, run the tests and generate the
+coverage:
 
     npm test
 

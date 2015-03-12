@@ -7,15 +7,22 @@
     "strigoi": "./bin/strigoi.js"
   },
   "scripts": {
+    "cover": "mocha --require coffee-coverage/register --compilers coffee:coffee-script/register -R html-cov --bail test > coverage.html",
     "docs": "docco src/index.coffee",
+    "lcov": "npm run postinstall && node_modules/.bin/jscover lib libcov && coffee -cbo testjs test && SRC_REQ=../libcov node_modules/.bin/mocha -R mocha-lcov-reporter testjs > coverage.lcov; rm -fr testjs libcov",
     "postinstall": "rm -fr lib/*; coffee -cbo lib src",
+    "posttest": "npm run docs && npm run cover",
+    "pretest": "npm i",
     "test": "mocha --compilers coffee:coffee-script/register"
   },
   "dependencies": {
     "chai": "^2.0.0",
+    "coffee-coverage": "^0.4.5",
     "coffee-script": "^1.9.1",
     "docco": "^0.7.0",
-    "mocha": "^2.1.0"
+    "jscover": "^0.2.4",
+    "mocha": "^2.1.0",
+    "mocha-lcov-reporter": "0.0.2"
   },
   "repository": {
     "type": "git",

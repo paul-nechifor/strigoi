@@ -1,5 +1,5 @@
-require('chai').should()
-s = require '../src'
+should = require('chai').should()
+s = require process.env.SRC_REQ or '../src'
 
 describe 'File', ->
 
@@ -19,5 +19,9 @@ describe 'File', ->
       .path.should.equal '/i/am'
 
     it 'should have no parent', ->
-      s.File.createRootDir '/asdf/ff'
-      .root is null
+      f = s.File.createRootDir '/asdf/ff'
+      should.equal f.parent, null
+
+    it 'should have no children', ->
+      f = s.File.createRootDir '/asdf/weoifjwe'
+      should.equal f.children, null
