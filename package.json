@@ -9,7 +9,7 @@
   "scripts": {
     "cover": "mocha --require coffee-coverage/register --compilers coffee:coffee-script/register -R html-cov --bail test > coverage.html",
     "docs": "docco src/index.coffee",
-    "lcov": "npm run postinstall && node_modules/.bin/jscover lib libcov && coffee -cbo testjs test && SRC_REQ=../libcov node_modules/.bin/mocha -R mocha-lcov-reporter testjs | node_modules/coveralls/bin/coveralls.js; rm -fr testjs libcov",
+    "lcov": "npm run postinstall && node_modules/.bin/jscover lib libcov && cp lib/index.js . && coffee -cbo testjs test && SRC_REQ=../libcov node_modules/.bin/mocha -R mocha-lcov-reporter testjs | node_modules/coveralls/bin/coveralls.js; rm -fr testjs libcov",
     "postinstall": "rm -fr lib/*; coffee -cbo lib src",
     "posttest": "npm run docs && npm run cover",
     "pretest": "npm i",
