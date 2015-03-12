@@ -50,11 +50,13 @@ exports.parseStrigParts = (text) ->
   delimRegex = /^---\w*(.*)\w*$/
   textLines = text.split '\n'
 
+  # Check that the first line starts with a header delimiter.
   unless textLines[0].match delimRegex
     throw new StrigParsingEx 'start-delimiter-missing', 1
 
   for line, i in textLines
 
+    # Keep pushing lines until a delimiter is found.
     match = line.match delimRegex
     if not match
       lines.push line
@@ -63,21 +65,29 @@ exports.parseStrigParts = (text) ->
     singleLineHeader = match[1]
 
     if readingHeader
+      # Check that we aren't reading two successive headers.
       if singleLineHeader
         throw new StrigParsingEx 'header-after-header', i
+
       header = lines.join '\n'
+
     else
-      if lines isnt null
-        parts.push header: header, content: lines
+      # Push the previous part unless this is the first header and there isn't
+      # one.
+      parts.push header: header, content: lines unless lines is null
+
       header = singleLineHeader if singleLineHeader
 
+    # Check which part should be expected next and reset the lines.
     readingHeader = not (readingHeader or singleLineHeader)
     lines = []
 
+  # Always push the last part since the previous are pushed when a successor is
+  # found.
   parts.push header: header, content: lines
 
+  # Return the parsed YAML headers and the joined content lines.
   parts.map (x) -> header: yaml.safeLoad(x.header), content: x.content.join '\n'
-
 
 # ## Strigoi
 
