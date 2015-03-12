@@ -21,6 +21,7 @@
     "coffee-script": "^1.9.1",
     "coveralls": "^2.11.2",
     "docco": "^0.7.0",
+    "js-yaml": "^3.2.7",
     "jscover": "^0.2.4",
     "mocha": "^2.1.0",
     "mocha-lcov-reporter": "0.0.2"
