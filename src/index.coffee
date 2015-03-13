@@ -21,7 +21,7 @@ exports.StrigFsEx = class StrigFsEx
 # or part of a regular file.
 exports.File = class File
 
-  constructor: (@parent, @name) ->
+  constructor: (@strigoi, @parent, @name) ->
 
     # The full path of this file's location.
     @path = null
@@ -39,27 +39,28 @@ exports.File = class File
     @processor = null
 
   # This is a builder method for creating the root (a file that has no parent).
-  @createRootDir = (dir) ->
+  @createRootDir = (strigoi, dir) ->
     dir = path.resolve process.cwd(), dir
-    ret = new File null, path.basename dir
+    ret = new File strigoi, null, path.basename dir
     ret.path = dir
     ret.children = {}
     ret
 
   addChild: (name, isDir) ->
-    f = new File @, name
+    f = new File @strigoi, @, name
     f.path = path.join @path, name
     f.children = {} if isDir
     @children[name] = f
 
   # Recursivelly scan all the files/directories in this directory and construct
   # their `File` representation.
-  scanAllFiles: (config, cb) ->
+  scanAllFiles: (cb) ->
     strigFileFound = false
+    {processors, walkIgnore} = @strigoi.config
 
     # Check if this file type has a processor using the extension.
     getProcessorFor = (fileName) ->
-      for p in config.processors
+      for p in processors
         return p if fileName.match p.extRegex
       null
 
@@ -83,7 +84,7 @@ exports.File = class File
       fs.readdir dir.path, (err, list) ->
         return cb err if err
         # Filter out ignored files.
-        list = list.filter (x) -> not x.match config.walkIgnore
+        list = list.filter (x) -> not x.match walkIgnore
         async.map list, tryToAdd(dir), cb
 
     fs.stat @path, (err, stat) =>
@@ -181,8 +182,17 @@ exports.Strigoi = class Strigoi
 
   @create = (dir) ->
     s = new Strigoi
-    s.root = File.createRootDir dir
+    s.root = File.createRootDir @, dir
     return s
 
   run: (cb) ->
-    @root.scanAllFiles @config, cb
+    async.series [
+      scanAllFiles
+      readInitialConfigs
+    ].map((x) => x.bind @), cb
+
+  scanAllFiles: (cb) ->
+    @root.scanAllFiles cb
+
+  readInitialConfigs: (cb) ->
+    cb

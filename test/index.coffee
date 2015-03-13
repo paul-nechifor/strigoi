@@ -38,15 +38,15 @@ getFilesAsDict = (root) ->
 
 assertScan = (mock, cwd, dir, done, equal, expectErr, config) ->
   fsys {mock: mock, cwd: cwd}, (cb) ->
-    strig = s.Strigoi.create dir
-    strig.config = config if config
-    strig.run (err) ->
+    root = s.File.createRootDir (new s.Strigoi), dir
+    root.strigoi.config = config if config
+    root.scanAllFiles (err) ->
       cb()
       if expectErr
         err.should.deep.equal expectErr
       else
         should.not.exist err
-        getFilesAsDict strig.root
+        getFilesAsDict root
         .should.deep.equal equal
       done()
 
@@ -56,20 +56,21 @@ assertScan = (mock, cwd, dir, done, equal, expectErr, config) ->
 describe 'File', ->
 
   describe '#createRootDir', ->
+    emptyStrig = new s.Strigoi
 
     it 'should get rid of path redundancies', ->
-      s.File.createRootDir '/highway/./to/the/../heaven'
+      s.File.createRootDir emptyStrig, '/highway/./to/the/../heaven'
       .path.should.equal '/highway/to/heaven'
 
     it 'should get rid of trailing slashes', ->
-      s.File.createRootDir '/it/is/'
+      s.File.createRootDir emptyStrig, '/it/is/'
       .path.should.equal '/it/is'
 
-      s.File.createRootDir '/i/am///'
+      s.File.createRootDir emptyStrig, '/i/am///'
       .path.should.equal '/i/am'
 
     it 'should keep the root slash', ->
-      s.File.createRootDir '/'
+      s.File.createRootDir emptyStrig, '/'
       .path.should.equal '/'
 
     it 'should use absolute paths', (done) ->
@@ -77,17 +78,17 @@ describe 'File', ->
         mock: '/there/once/was': 'a'
         cwd: '/there'
       , (cb) ->
-        s.File.createRootDir 'once/'
+        s.File.createRootDir emptyStrig, 'once/'
         .path.should.equal '/there/once'
         cb()
         done()
 
     it 'should have no parent', ->
-      f = s.File.createRootDir '/asdf/ff'
+      f = s.File.createRootDir emptyStrig, '/asdf/ff'
       should.equal f.parent, null
 
     it 'should have no children loaded', ->
-      s.File.createRootDir '/asdf/weoifjwe'
+      s.File.createRootDir emptyStrig, '/asdf/weoifjwe'
       .children.should.deep.equal {}
 
   describe '#scanAllFiles', ->
