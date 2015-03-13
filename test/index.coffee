@@ -10,11 +10,12 @@ s = require process.env.SRC_REQ or '../src'
 
 fsys = (opts, cb) ->
   {cwd, chdir} = process
-  currentDir = opts.cwd or '/'
+  currentDir = '/'
   process.cwd = -> currentDir
   process.chdir = (dir) -> currentDir = dir
 
   mockFs opts.mock
+  process.chdir opts.cwd
 
   doneCb = ->
     mockFs.restore()
@@ -22,6 +23,32 @@ fsys = (opts, cb) ->
     process.chdir = chdir
 
   cb doneCb
+
+getFilesAsDict = (root) ->
+  ret = {}
+
+  if root.children isnt null
+    ret.children = {}
+    for k, v of root.children
+      ret.children[k] = getFilesAsDict v
+  else
+    ret.children = null
+
+  ret
+
+assertScan = (mock, cwd, dir, done, equal, expectErr, config) ->
+  fsys {mock: mock, cwd: cwd}, (cb) ->
+    strig = s.Strigoi.create dir
+    strig.config = config if config
+    strig.run (err) ->
+      cb()
+      if expectErr
+        err.should.deep.equal expectErr
+      else
+        should.not.exist err
+        getFilesAsDict strig.root
+        .should.deep.equal equal
+      done()
 
 # ## Tests
 
@@ -31,34 +58,114 @@ describe 'File', ->
   describe '#createRootDir', ->
 
     it 'should get rid of path redundancies', ->
-
       s.File.createRootDir '/highway/./to/the/../heaven'
       .path.should.equal '/highway/to/heaven'
 
     it 'should get rid of trailing slashes', ->
-
       s.File.createRootDir '/it/is/'
       .path.should.equal '/it/is'
 
       s.File.createRootDir '/i/am///'
       .path.should.equal '/i/am'
 
-    it 'should use absolute paths', ->
+    it 'should keep the root slash', ->
+      s.File.createRootDir '/'
+      .path.should.equal '/'
+
+    it 'should use absolute paths', (done) ->
       fsys
-        config: '/there/once/was': 'a'
+        mock: '/there/once/was': 'a'
         cwd: '/there'
       , (cb) ->
         s.File.createRootDir 'once/'
         .path.should.equal '/there/once'
         cb()
+        done()
 
     it 'should have no parent', ->
       f = s.File.createRootDir '/asdf/ff'
       should.equal f.parent, null
 
-    it 'should have no children', ->
-      f = s.File.createRootDir '/asdf/weoifjwe'
-      should.equal f.children, null
+    it 'should have no children loaded', ->
+      s.File.createRootDir '/asdf/weoifjwe'
+      .children.should.deep.equal {}
+
+  describe '#scanAllFiles', ->
+
+    it 'should read an all .strig directory structure', (done) ->
+      mock =
+        '/aici':
+          'a.strig': 'a'
+          'b.strig': 'b'
+
+      assertScan mock, '/', '/', done,
+        children:
+          'aici':
+            children:
+              'a.strig':
+                children: null
+              'b.strig':
+                children: null
+          'tmp':
+            children: {}
+
+    it 'should ignore unrecognized files', (done) ->
+      mock =
+        '/aici':
+          'a.strig': 'a'
+          'b.qqqqqqq': 'b'
+      assertScan mock, '/.//', '/././/', done,
+        children:
+          'aici':
+            children:
+              'a.strig':
+                children: null
+          'tmp':
+            children: {}
+
+    it 'should respect ignore rules', (done) ->
+      mock =
+        '/aa':
+          'bb':
+            'b.strig': 'b'
+          'cc':
+            'c.strig': 'c'
+          'dd':
+            'd.strig': 'd'
+      expect =
+        children:
+          'bb':
+            children:
+              'b.strig':
+                children: null
+          'dd':
+            children:
+              'd.strig':
+                children: null
+      config = new s.Config
+      config.walkIgnore = /^cc$/
+
+      assertScan mock, '/aa/cc', '/aa', done, expect, null, config
+
+    it 'should fail if no .strig files are found', (done) ->
+      mock =
+        '/aici2':
+          'a.strig': 'a'
+        '/not-here':
+          'a.qqqqqqq': 'a'
+      assertScan mock, '/aici', '/not-here', done, null,
+          new s.StrigFsEx 'no-strig-files'
+
+    it 'should fail if a file is given instead of a dir', (done) ->
+      mock = '/aaa': 'a.qqqqqqq': 'a'
+      assertScan mock, '/aaa', '/aaa/a.qqqqqqq', done, null,
+          new s.StrigFsEx 'not-a-dir'
+
+    it 'should fail if the dir does not exist', (done) ->
+      mock = '/bbb': 'a.qqqqqqq': 'a'
+      assertScan mock, '/bbb', '/ccc', done, null,
+          new s.StrigFsEx 'not-a-dir'
+
 
 # ### parseStrigParts
 describe 'parseStrigParts', ->
