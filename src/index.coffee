@@ -32,6 +32,8 @@ exports.File = class File
     # The string content of this file (or `null` for directories).
     @content = null
 
+    @parsed = null
+
     # Whether this is an actual regular file or the part of another.
     @pseudo = false
 
@@ -195,4 +197,4 @@ exports.Strigoi = class Strigoi
     @root.scanAllFiles cb
 
   readInitialConfigs: (cb) ->
-    cb
+    cb()
