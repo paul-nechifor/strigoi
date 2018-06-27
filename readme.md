@@ -1,3 +1,7 @@
+# This repository has been moved to [gitlab.com/paul-nechifor/strigoi](http://gitlab.com/paul-nechifor/strigoi).
+
+Old readme:
+
 # Strigoi
 
 Multiformat static site generator.
